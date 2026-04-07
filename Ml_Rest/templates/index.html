@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ITEMS API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(70, 90, 130, 0.18), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(255, 215, 120, 0.08), transparent 30%),
+        linear-gradient(180deg, #05070d 0%, #0a0f1c 50%, #05070d 100%);
+      color: #f5f7fa;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* glowing background particles */
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      background-image:
+        radial-gradient(circle, rgba(255, 214, 102, 0.18) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+        radial-gradient(circle, rgba(104, 187, 255, 0.12) 1px, transparent 1px);
+      background-size: 180px 180px, 240px 240px, 300px 300px;
+      background-position: 20px 40px, 100px 120px, 180px 80px;
+      opacity: 0.45;
+    }
+
+    .container {
+      width: min(1200px, 92%);
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    .hero-box {
+      width: 100%;
+      max-width: 900px;
+      padding: 48px 28px;
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        0 0 60px rgba(255, 215, 120, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .version {
+      display: inline-block;
+      font-size: 0.9rem;
+      color: #c5cfdd;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, #fff2c8 0%, #ffd76a 45%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 20px rgba(255, 215, 106, 0.18),
+        0 0 40px rgba(255, 215, 106, 0.08);
+      margin-bottom: 18px;
+    }
+
+    .meta {
+      color: #9dadc4;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      margin-bottom: 28px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .badge {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #f8e4a8;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: 0 0 18px rgba(255, 215, 120, 0.08);
+    }
+
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 28px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(135deg, rgba(255, 214, 102, 0.95), rgba(255, 189, 46, 0.95));
+      color: #111;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 30px rgba(255, 199, 71, 0.22);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 16px 36px rgba(255, 199, 71, 0.30);
+    }
+
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 22px;
+      border-radius: 18px;
+      text-decoration: none;
+      color: #e8eef9;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s ease;
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .section {
+      padding: 20px 0 80px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      text-align: center;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: #9dadc4;
+      max-width: 700px;
+      margin: 0 auto 42px;
+      line-height: 1.6;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      border-radius: 24px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.28),
+        0 0 22px rgba(255, 215, 120, 0.05);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255, 215, 120, 0.22);
+      box-shadow:
+        0 18px 34px rgba(0, 0, 0, 0.35),
+        0 0 30px rgba(255, 215, 120, 0.10);
+    }
+
+    .endpoint-method {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: rgba(255, 215, 120, 0.12);
+      color: #ffd76a;
+      border: 1px solid rgba(255, 215, 120, 0.18);
+    }
+
+    .endpoint-path {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+      word-break: break-word;
+    }
+
+    .endpoint-description {
+      color: #9dadc4;
+      line-height: 1.6;
+      font-size: 0.96rem;
+    }
+
+    .footer {
+      padding: 30px 0 50px;
+      text-align: center;
+      color: #7f8ea8;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding-top: 40px;
+      }
+
+      .hero-box {
+        padding: 36px 20px;
+        border-radius: 24px;
+      }
+
+      .meta {
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .primary-btn,
+      .secondary-btn {
+        width: 100%;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <section class="hero">
+      <div class="hero-box">
+        <div class="version">REST API v1.0</div>
+        <h1 class="title">ITEMS API</h1>
+        <p class="meta">ID • NAME • PRICE • DESCRIPTION</p>
+
+        <div class="badges">
+          <span class="badge">LIVE</span>
+          <span class="badge">FASTAPI</span>
+          <span class="badge">JSON</span>
+          <span class="badge">RESTFUL</span>
+        </div>
+
+        <div class="hero-buttons">
+          <a class="primary-btn" href="http://127.0.0.1:8000/docs" target="_blank">
+            Explore Swagger Docs →
+          </a>
+          <a class="secondary-btn" href="#endpoints">
+            View Endpoints
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="endpoints">
+      <h2 class="section-title">API Endpoints</h2>
+      <p class="section-subtitle">
+        Clean, modern, developer-friendly endpoints for managing your items through a professional REST API interface.
+      </p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="endpoint-method">GET</div>
+          <div class="endpoint-path">/items</div>
+          <p class="endpoint-description">List all items.</p>
+        </div>
+
+        <div class="card">
+          <div class="endpoint-method">POST</div>
+          <div class="endpoint-path">/items</div>
+          <p class="endpoint-description">Create a new item.</p>
+        </div>
+
+        <div class="card">
+          <div class="endpoint-method">GET</div>
+          <div class="endpoint-path">/items/{id}</div>
+          <p class="endpoint-description">Fetch one item by its unique ID.</p>
+        </div>
+
+        <div class="card">
+          <div class="endpoint-method">PUT</div>
+          <div class="endpoint-path">/items/{id}</div>
+          <p class="endpoint-description">Update an existing item.</p>
+        </div>
+
+        <div class="card">
+          <div class="endpoint-method">DELETE</div>
+          <div class="endpoint-path">/items/{id}</div>
+          <p class="endpoint-description">Remove an item from the collection.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Built for a modern FastAPI project • iOS-inspired glass UI • Developer-focused landing page
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener("click", function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute("href"));
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

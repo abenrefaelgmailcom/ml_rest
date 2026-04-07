@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RunTime ML Predictor</title>
+  <style>
+    :root {
+      /* 60% */
+      --bg-main: #f5f7fb;
+      --bg-card: rgba(255, 255, 255, 0.72);
+      --bg-soft: #eef2f7;
+
+      /* 30% */
+      --primary: #1f6feb;
+      --primary-soft: #dbeafe;
+      --primary-dark: #174ea6;
+
+      /* 10% */
+      --accent: #ff8a3d;
+      --accent-soft: #ffe7d6;
+
+      --text-main: #1f2937;
+      --text-soft: #6b7280;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --white: #ffffff;
+      --border: rgba(255, 255, 255, 0.45);
+      --shadow: 0 12px 40px rgba(31, 41, 55, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --transition: 0.25s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(31,111,235,0.15), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(255,138,61,0.15), transparent 25%),
+        var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .app {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .glass {
+      background: var(--bg-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+    }
+
+    .hero-left {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-left::before {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(31, 111, 235, 0.12);
+      top: -80px;
+      right: -70px;
+      filter: blur(8px);
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.05;
+      margin-bottom: 14px;
+      letter-spacing: -1px;
+    }
+
+    .hero p {
+      color: var(--text-soft);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 680px;
+    }
+
+    .hero-right {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .mini-stat {
+      background: rgba(255,255,255,0.65);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.55);
+    }
+
+    .mini-stat h3 {
+      font-size: 14px;
+      color: var(--text-soft);
+      margin-bottom: 8px;
+    }
+
+    .mini-stat p {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .panel-header h2 {
+      font-size: 1.25rem;
+      letter-spacing: -0.3px;
+    }
+
+    .panel-header span {
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.9);
+      color: var(--text-main);
+      box-shadow: inset 0 0 0 1px rgba(209,213,219,0.6);
+      font-size: 15px;
+      transition: var(--transition);
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      box-shadow:
+        inset 0 0 0 2px rgba(31,111,235,0.6),
+        0 0 0 4px rgba(31,111,235,0.08);
+    }
+
+    .field textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--white);
+      box-shadow: 0 10px 24px rgba(31,111,235,0.22);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--primary-dark);
+      box-shadow: inset 0 0 0 1px rgba(31,111,235,0.16);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), #ff6a00);
+      color: var(--white);
+      box-shadow: 0 10px 24px rgba(255,138,61,0.22);
+    }
+
+    .output {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.7);
+      color: var(--text-main);
+      box-shadow: inset 0 0 0 1px rgba(209,213,219,0.5);
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 70px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .token-box {
+      background: rgba(31,111,235,0.08);
+      border: 1px solid rgba(31,111,235,0.16);
+    }
+
+    .status-bar {
+      margin-top: 24px;
+      padding: 18px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .status-title {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .status-sub {
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: #9a4b00;
+    }
+
+    .success {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .error {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--text-soft);
+      margin-top: 18px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+
+      .hero-left,
+      .hero-right,
+      .panel {
+        padding: 18px;
+      }
+
+      .form-row-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-row {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="hero-left glass">
+        <div class="tag">REST API + JWT + Polynomial Regression</div>
+        <h1>RunTime ML Predictor</h1>
+        <p>
+          Train your own model, save it per user, and predict running time from training hours.
+          Clean iOS-style dashboard, responsive layout, and direct integration with your FastAPI backend.
+        </p>
+      </div>
+
+      <div class="hero-right glass">
+        <div class="mini-stat">
+          <h3>API Base</h3>
+          <p id="apiBaseLabel">/</p>
+        </div>
+        <div class="mini-stat">
+          <h3>Current User</h3>
+          <p id="currentUserLabel">Guest</p>
+        </div>
+        <div class="mini-stat">
+          <h3>Authorization</h3>
+          <p id="authStateLabel">Not Connected</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="panel glass">
+        <div class="panel-header">
+          <h2>User Access</h2>
+          <span>Register and login</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-row-2">
+            <div class="field">
+              <label for="regUserName">User Name</label>
+              <input type="text" id="regUserName" placeholder="adam" />
+            </div>
+
+            <div class="field">
+              <label for="regEmail">Email</label>
+              <input type="email" id="regEmail" placeholder="adam@gmail.com" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" placeholder="1234" />
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" onclick="registerUser()">Create User</button>
+          </div>
+
+          <div class="output" id="registerOutput">Register response will appear here.</div>
+
+          <hr style="border: none; height: 1px; background: rgba(209,213,219,0.6); margin: 6px 0 2px;" />
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="loginUserName">Login User Name</label>
+              <input type="text" id="loginUserName" placeholder="adam" />
+            </div>
+
+            <div class="field">
+              <label for="loginPassword">Login Password</label>
+              <input type="password" id="loginPassword" placeholder="1234" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" onclick="loginUser()">Login + Save Token</button>
+            <button class="btn-secondary" onclick="clearToken()">Logout</button>
+          </div>
+
+          <div class="output token-box" id="loginOutput">Login response / token preview will appear here.</div>
+        </div>
+      </div>
+
+      <div class="panel glass">
+        <div class="panel-header">
+          <h2>Model Actions</h2>
+          <span>Train and predict</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="trainX">Training Hours X</label>
+            <textarea id="trainX" placeholder="2, 3, 5, 7, 9, 12, 16, 20, 25, 30">2, 3, 5, 7, 9, 12, 16, 20, 25, 30</textarea>
+          </div>
+
+          <div class="field">
+            <label for="trainY">Running Times Y</label>
+            <textarea id="trainY" placeholder="95, 85, 70, 65, 60, 55, 50, 53, 58, 70">95, 85, 70, 65, 60, 55, 50, 53, 58, 70</textarea>
+          </div>
+
+          <div class="form-row-2">
+            <div class="field">
+              <label for="degree">Polynomial Degree</label>
+              <input type="number" id="degree" value="3" min="1" max="10" />
+            </div>
+
+            <div class="field">
+              <label for="predictHours">Hours for Prediction</label>
+              <input type="number" id="predictHours" value="15" min="0" step="0.1" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" onclick="trainModel()">Train Model</button>
+            <button class="btn-accent" onclick="predictModel()">Predict Time</button>
+          </div>
+
+          <div class="output" id="mlOutput">Training and prediction results will appear here.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="status-bar glass">
+      <div class="status-left">
+        <div class="status-title">System Status</div>
+        <div class="status-sub" id="systemStatusText">Ready. Waiting for action.</div>
+      </div>
+
+      <div class="pill" id="tokenPill">Token: Missing</div>
+    </section>
+
+    <div class="footer-note">
+      Built for your FastAPI project · iOS style · responsive UI · 60/30/10 color balance
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let accessToken = localStorage.getItem("access_token") || "";
+    let currentUser = localStorage.getItem("current_user") || "";
+
+    document.getElementById("apiBaseLabel").textContent = API_BASE;
+    updateUIState();
+
+    function updateUIState() {
+      document.getElementById("currentUserLabel").textContent = currentUser || "Guest";
+      document.getElementById("authStateLabel").textContent = accessToken ? "Authorized" : "Not Connected";
+      document.getElementById("tokenPill").textContent = accessToken ? "Token: Saved" : "Token: Missing";
+      document.getElementById("tokenPill").style.background = accessToken ? "rgba(22,163,74,0.12)" : "var(--accent-soft)";
+      document.getElementById("tokenPill").style.color = accessToken ? "var(--success)" : "#9a4b00";
+    }
+
+    function setStatus(message, isError = false) {
+      const el = document.getElementById("systemStatusText");
+      el.textContent = message;
+      el.className = isError ? "status-sub error" : "status-sub";
+    }
+
+    function pretty(obj) {
+      return JSON.stringify(obj, null, 2);
+    }
+
+    function parseNumberList(text) {
+      return text
+        .split(",")
+        .map(item => item.trim())
+        .filter(item => item !== "")
+        .map(Number);
+    }
+
+    async function request(path, method = "GET", body = null, useAuth = false) {
+      const headers = {
+        "Content-Type": "application/json"
+      };
+
+      if (useAuth) {
+        if (!accessToken) {
+          throw new Error("No token found. Please login first.");
+        }
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+
+      const options = {
+        method,
+        headers
+      };
+
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(`${API_BASE}${path}`, options);
+
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = { detail: "Response is not valid JSON" };
+      }
+
+      if (!response.ok) {
+        throw new Error(data.detail || `HTTP error ${response.status}`);
+      }
+
+      return data;
+    }
+
+    async function registerUser() {
+      const user_name = document.getElementById("regUserName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+
+      const output = document.getElementById("registerOutput");
+
+      try {
+        if (!user_name || !email || !password) {
+          throw new Error("Please fill all register fields.");
+        }
+
+        const data = await request("/users", "POST", {
+          user_name,
+          email,
+          password
+        });
+
+        output.textContent = pretty(data);
+        output.className = "output success";
+
+        document.getElementById("loginUserName").value = user_name;
+        document.getElementById("loginPassword").value = password;
+
+        setStatus("User created successfully.");
+      } catch (error) {
+        output.textContent = error.message;
+        output.className = "output error";
+        setStatus(error.message, true);
+      }
+    }
+
+    async function loginUser() {
+      const user_name = document.getElementById("loginUserName").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      const output = document.getElementById("loginOutput");
+
+      try {
+        if (!user_name || !password) {
+          throw new Error("Please fill all login fields.");
+        }
+
+        const data = await request("/auth/login", "POST", {
+          user_name,
+          password
+        });
+
+        accessToken = data.access_token;
+        currentUser = user_name;
+
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("current_user", currentUser);
+
+        output.textContent = pretty({
+          token_type: data.token_type,
+          access_token_preview: accessToken.slice(0, 35) + "..."
+        });
+        output.className = "output success";
+
+        updateUIState();
+        setStatus("Login successful. Token saved in localStorage.");
+      } catch (error) {
+        output.textContent = error.message;
+        output.className = "output error";
+        setStatus(error.message, true);
+      }
+    }
+
+    function clearToken() {
+      accessToken = "";
+      currentUser = "";
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("current_user");
+
+      document.getElementById("loginOutput").textContent = "Token removed. You are now logged out.";
+      document.getElementById("loginOutput").className = "output";
+      updateUIState();
+      setStatus("Logged out.");
+    }
+
+    async function trainModel() {
+      const output = document.getElementById("mlOutput");
+
+      try {
+        const X = parseNumberList(document.getElementById("trainX").value);
+        const Y = parseNumberList(document.getElementById("trainY").value);
+        const degree = Number(document.getElementById("degree").value);
+
+        if (X.length === 0 || Y.length === 0) {
+          throw new Error("X and Y cannot be empty.");
+        }
+
+        if (X.some(num => Number.isNaN(num)) || Y.some(num => Number.isNaN(num))) {
+          throw new Error("X and Y must contain valid numbers only.");
+        }
+
+        const data = await request("/train", "POST", { X, Y, degree }, true);
+
+        output.textContent = pretty(data);
+        output.className = "output success";
+        setStatus("Model trained successfully.");
+      } catch (error) {
+        output.textContent = error.message;
+        output.className = "output error";
+        setStatus(error.message, true);
+      }
+    }
+
+    async function predictModel() {
+      const output = document.getElementById("mlOutput");
+
+      try {
+        const hours = Number(document.getElementById("predictHours").value);
+
+        if (Number.isNaN(hours)) {
+          throw new Error("Please enter a valid hours value.");
+        }
+
+        const data = await request(`/predict/${hours}`, "GET", null, true);
+
+        output.textContent = pretty(data);
+        output.className = "output success";
+        setStatus(`Prediction completed for ${hours} hours.`);
+      } catch (error) {
+        output.textContent = error.message;
+        output.className = "output error";
+        setStatus(error.message, true);
+      }
+    }
+  </script>
+</body>
+</html>
